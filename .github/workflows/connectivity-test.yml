@@ -1,0 +1,46 @@
+name: Connectivity Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ip:
+        description: 'Source IP (for logging/reference)'
+        required: true
+        type: string
+      destination_ip:
+        description: 'Destination IP to test'
+        required: true
+        type: string
+      ports:
+        description: 'Comma-separated list of ports to test (e.g., 80,443)'
+        required: true
+        type: string
+
+jobs:
+  connectivity-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up service account credentials
+        run: |
+          echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" > sa-key.json
+        env:
+          SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
+      - name: Install netcat
+        run: sudo apt-get install -y netcat
+
+      - name: Run connectivity test
+        run: |
+          echo "Source IP: ${{ inputs.source_ip }}"
+          echo "Destination IP: ${{ inputs.destination_ip }}"
+          echo "Ports to test: ${{ inputs.ports }}"
+
+          IFS=',' read -ra PORT_ARRAY <<< "${{ inputs.ports }}"
+          for port in "${PORT_ARRAY[@]}"; do
+            echo "Testing TCP connectivity to ${{ inputs.destination_ip }} on port $port"
+            nc -zv -w 5 ${{ inputs.destination_ip }} $port
+          done
