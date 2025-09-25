@@ -31,7 +31,7 @@ jobs:
           SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
 
       - name: Install netcat
-        run: sudo apt-get install -y netcat
+        run: sudo apt-get install -y netcat-openbsd
 
       - name: Run connectivity test
         run: |
